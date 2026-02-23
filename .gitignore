@@ -1,0 +1,12 @@
+# Ignorar ambiente virtual
+.venv/
+
+# Ignorar arquivos de cache do Python
+__pycache__/
+
+# Ignorar arquivos do sistema (caso esteja em macOS ou Windows)
+.DS_Store
+Thumbs.db
+
+# Outros arquivos específicos do seu projeto
+*.log
