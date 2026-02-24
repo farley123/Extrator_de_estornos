@@ -1,12 +1,14 @@
 from pypdf import PdfReader,PdfWriter
 from io import BytesIO
-import os
 from PyPDF2 import PdfReader, PdfWriter, PageObject
 from reportlab.pdfgen import canvas
+import sys
+import os
+
 
 class GerarPdf:
     def __init__(self,lista_de_dados):
-        self.template_pdf = PdfReader('formulario_estorno.pdf')
+        self.template_pdf = PdfReader(self.resource_path("formulario_estorno.pdf"))
         self.writer = PdfWriter()
         self.lista_de_dados = lista_de_dados
 
@@ -47,11 +49,27 @@ class GerarPdf:
             overlay_pdf = PdfReader(packet)
             self.writer.add_page(self.__merge_template_com_template_temporario(overlay_pdf))
 
+    def salvar_pdf(self, output_dir):
+        try:
+            self.__criar_pdf()
 
-    def salvar_pdf(self,output_dir):
-        self.__criar_pdf()
-        pasta_saida = os.path.join(output_dir,"estornos.pdf")
-        os.makedirs(pasta_saida, exist_ok=True)
-        output_final = os.path.join(pasta_saida, "todos_registros.pdf")
-        with open(output_final, "wb") as f:
-            self.writer.write(f)
+            # cria uma pasta, NÃO um arquivo .pdf
+            pasta_saida = os.path.join(output_dir, "estornos")
+            os.makedirs(pasta_saida, exist_ok=True)
+
+            # arquivo final
+            output_final = os.path.join(pasta_saida, "todos_registros.pdf")
+
+            with open(output_final, "wb") as f:
+                self.writer.write(f)
+
+        except Exception as e:
+            # log de erro (essencial no executável)
+            with open("erro_pdf.log", "w", encoding="utf-8") as f:
+                f.write(str(e))
+            raise
+
+    def resource_path(self,relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.getcwd(), relative_path)

@@ -1,60 +1,54 @@
 import flet as ft
+
 from formatar_planilha import FormatarPlanilha
-from  gerar_pdf import GerarPdf
+
+
+# Supondo que essas classes estejam em arquivos separados no seu projeto
+from formatar_planilha import FormatarPlanilha
+from gerar_pdf import GerarPdf
 
 def main(page: ft.Page):
     page.title = "Extrator de estornos"
     page.vertical_alignment = ft.MainAxisAlignment.START
-    page.window.width=1400
-    page.window.height=300
-    page.theme_mode=ft.ThemeMode.LIGHT
-    page.window.resizable=False
-    page.window.maximizable=False
-    picker_planilha=ft.FilePicker()
-    picker_destino=ft.FilePicker()
-    page.session.set("lista_de_dados", None)
-    page.session.set("destino_path", None)
+    page.window.width = 1400
+    page.window.height = 300
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.window.resizable = False
+    page.window.maximizable = False
 
-    progress = ft.ProgressBar(
-        width=400,
-        visible=False
-    )
+    #
+    lista_de_dados=None
+    destino_path= None
+
+    progress = ft.ProgressBar(width=400, visible=False)
+
     selecionar_planilha = ft.TextField(label='Selecionar planilha', text_align=ft.TextAlign.LEFT, width=600)
     selecionar_destino = ft.TextField(label='selecionar destino', text_align=ft.TextAlign.LEFT, width=600)
-    def selecionar_planilha_picker(e: ft.FilePickerResultEvent):
-        if e.files:
-            selecionar_planilha.value = e.files[0].path
-            page.session.set(
-                "lista_de_dados",
-                FormatarPlanilha(selecionar_planilha.value).gerar_lista_de_dados()
-            )
-            page.update()
-    def selecionar_destino_picker(e: ft.FilePickerResultEvent):
-        if e.path:
-            selecionar_destino.value = e.path
-            page.session.set("destino_path", selecionar_destino.value)
-            page.update()
 
 
-    picker_planilha.on_result = selecionar_planilha_picker
-    picker_destino.on_result = selecionar_destino_picker
+    async def handle_pick_files(e: ft.Event[ft.Button]):
+        files =await  ft.FilePicker().pick_files()
+        selecionar_planilha.value =files[0].path
+        nonlocal lista_de_dados
+        lista_de_dados=FormatarPlanilha(selecionar_planilha.value).gerar_lista_de_dados()
 
-    page.overlay.append(picker_planilha)
-    page.overlay.append(picker_destino)
+    async def handle_get_directory_path(e: ft.Event[ft.Button]):
+        selecionar_destino.value = await ft.FilePicker().get_directory_path()
+        nonlocal destino_path
+        destino_path =selecionar_destino.value
 
 
 
 
     async def gerar_pdf_async():
-        lista = page.session.get("lista_de_dados")
-        destino = page.session.get("destino_path")
-        GerarPdf(lista).salvar_pdf(destino)
+
+
+        GerarPdf(lista_de_dados).salvar_pdf(destino_path)
 
         progress.visible = False
-        page.snack_bar = ft.SnackBar(
-            ft.Text("PDF gerado com sucesso!")
-        )
-        page.snack_bar.open = True
+        snack_bar = ft.SnackBar(ft.Text("PDF gerado com sucesso!"))
+        page.overlay.append(snack_bar)
+        snack_bar.open=True
         page.update()
 
     def criar_pdf(e):
@@ -67,24 +61,24 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.START,
             controls=[
                 selecionar_planilha,
-                ft.IconButton(ft.icons.PLAY_CIRCLE, on_click=lambda e: picker_planilha.pick_files(
-                        allow_multiple=False
-                    )),
+                ft.IconButton(ft.Icons.PLAY_CIRCLE,
+                              on_click=handle_pick_files),
                 selecionar_destino,
-                ft.IconButton(ft.icons.PLAY_CIRCLE, on_click=lambda e: picker_destino.get_directory_path()),
+                ft.IconButton(ft.Icons.PLAY_CIRCLE, on_click=handle_get_directory_path)
             ],
         ),
         ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
-                ft.ElevatedButton(text='Gerar pdf',bgcolor=ft.colors.GREEN,on_click=criar_pdf)
+                ft.Button(content=ft.Text('Gerar Pdf'), bgcolor=ft.Colors.GREEN, on_click=criar_pdf)
             ]
         ),
         ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
             controls=[progress]
         )
-
     )
 
-ft.app(target=main)
+
+# CORREÇÃO: ft.run em vez de ft.app
+ft.run(main)
