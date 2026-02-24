@@ -13,12 +13,14 @@ class FormatarPlanilha:
         database["Posting Date"] = database["Posting Date"].dt.strftime("%d/%m/%Y")
         database['Qty in KG'] = database["Qty in KG"] * -1
         database["Production Order"] = database["Production Order"].fillna("Não possui ordem de produção")
+        database['Work Center Resource']=database['Work Center Resource'].fillna('Não aplicável')
         return database
 
     def gerar_lista_de_dados(self):
         lista_dados = []
         for i, row in self.__formatar_planilha().iterrows():
             dados = {
+                "Work Center Resource":row["Work Center Resource"],
                 "Production Order": row["Production Order"],
                 "Material Code": row["Material Code"],
                 "Material Description": row["Material Description"],

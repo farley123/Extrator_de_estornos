@@ -29,6 +29,7 @@ class GerarPdf:
             c = canvas.Canvas(packet)
 
             # 🔹 Ajuste as coordenadas conforme seu layout
+            c.drawString(250,705,f"{dados['Work Center Resource']}")
             c.drawString(250, 670, f"{dados['Production Order']}")
             c.drawString(250, 635, f"{dados['Material Code']}")
             c.setFont("Helvetica", 10)

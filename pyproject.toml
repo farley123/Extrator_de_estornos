@@ -2,12 +2,13 @@
 name = "pythonproject"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.13"
+requires-python =   ">=3.11,<3.13"
 dependencies = [
     "flet[all]>=0.80.5",
     "ipykernel>=7.2.0",
     "openpyxl>=3.1.5",
     "pandas>=3.0.1",
+    "pyinstaller>=6.19.0",
     "pypdf>=6.7.1",
     "pypdf2>=3.0.1",
     "reportlab>=4.4.10",
